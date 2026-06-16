@@ -354,7 +354,7 @@ export default function Home() {
 
         {activeTab === 'GLOBE' && (
           <div className="h-full bg-[#080808]">
-            <Globe />
+            <Globe news={news} />
           </div>
         )}
 
