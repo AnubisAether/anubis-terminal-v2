@@ -1,5 +1,12 @@
 # ANUBIS TERMINAL v2
 
+## Claude Code Behavior Rules
+- Never explain what you're about to do, just do it
+- Never summarize what you just did, just confirm done
+- Always edit files directly, never show code in chat
+- One file at a time, smallest change possible
+- Never read files you weren't asked about
+
 ## Project Location
 C:\Users\Noreaga\anubis-terminal-v2
 

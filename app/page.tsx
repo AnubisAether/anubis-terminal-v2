@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import DXFeedPrices from '../components/DXFeedPrices'
 
 const Globe = dynamic(() => import('../components/Globe'), { ssr: false })
 
@@ -61,7 +62,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchAll() {
       try {
-        const res = await fetch('/api/prices')
+        const res = await fetch('/api/dxfeed-proxy')
         const data = await res.json()
         if (data.prices) {
           const mapped = data.prices.map((p: any) => ({
@@ -71,18 +72,9 @@ export default function Home() {
             percent: p.percent || 0,
           }))
           setPrices(mapped)
-          const osirisRes = await fetch('/api/osiris', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prices: mapped }),
-          })
-          const osirisData = await osirisRes.json()
-          if (osirisData.lines && osirisData.lines.length > 0) {
-            setOsirisLines(osirisData.lines)
-          }
         }
       } catch (e) {
-        console.error('Fetch failed', e)
+        console.error('Price fetch failed', e)
       }
       try {
         const newsRes = await fetch('/api/news')
@@ -93,8 +85,12 @@ export default function Home() {
       }
     }
     fetchAll()
-    const interval = setInterval(fetchAll, 30000)
+    const interval = setInterval(fetchAll, 15000)
     return () => clearInterval(interval)
+  }, [])
+
+  const handleDXFeedPrices = useCallback((incoming: any[]) => {
+    setPrices(incoming)
   }, [])
 
   const toggleCheck = (index: number) => {
@@ -143,7 +139,7 @@ export default function Home() {
 
   return (
     <div className="h-screen w-screen bg-[#080808] text-[#e5e7eb] font-mono overflow-hidden flex flex-col">
-
+      <DXFeedPrices onPricesUpdate={handleDXFeedPrices} />
       {/* Top Bar */}
       <div className="h-12 border-b border-[#d4a017]/15 flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-3">
@@ -359,10 +355,32 @@ export default function Home() {
         )}
 
         {activeTab === 'CHARTS' && (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-2xl font-bold tracking-[0.3em] text-[#d4a017] mb-3">CHARTS</div>
-              <div className="text-sm tracking-wider text-[#6b7280]">CONNECTING TO TRADINGVIEW</div>
+          <div className="h-full flex flex-col bg-[#080808] p-2 gap-2">
+            <div className="flex gap-2 h-full">
+              <div className="flex flex-col flex-1 gap-1">
+                <div className="text-xs font-mono font-bold tracking-[0.25em] text-[#d4a017]">NQ</div>
+                <iframe
+                  src="https://www.tradingview.com/chart/?symbol=CME_MINI%3ANQ1%21&interval=5&theme=dark"
+                  className="flex-1 w-full border-0 rounded"
+                  allowFullScreen
+                />
+              </div>
+              <div className="flex flex-col flex-1 gap-1">
+                <div className="text-xs font-mono font-bold tracking-[0.25em] text-[#d4a017]">ES</div>
+                <iframe
+                  src="https://www.tradingview.com/chart/?symbol=CME_MINI%3AES1%21&interval=5&theme=dark"
+                  className="flex-1 w-full border-0 rounded"
+                  allowFullScreen
+                />
+              </div>
+              <div className="flex flex-col flex-1 gap-1">
+                <div className="text-xs font-mono font-bold tracking-[0.25em] text-[#d4a017]">MGC</div>
+                <iframe
+                  src="https://www.tradingview.com/chart/?symbol=COMEX%3AMC1%21&interval=5&theme=dark"
+                  className="flex-1 w-full border-0 rounded"
+                  allowFullScreen
+                />
+              </div>
             </div>
           </div>
         )}
