@@ -43,3 +43,6 @@ next-env.d.ts
 .claude/
 
 .claude/
+
+auth.json
+auth2.json
